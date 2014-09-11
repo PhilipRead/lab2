@@ -6,11 +6,11 @@ app.get('/', function(req, res){
 	res.sendFile(__dirname + "/index.html");
 });
 
-app.get('/:id', function(req, res){
+app.get('/:user/:id', function(req, res){
 	if (req.params.id == "inventory") {
 	    res.set({'Content-Type': 'application/json'});
 	    res.status(200);
-	    res.send(inventory);
+	    res.send(user_data[req.params.user].inventory);
 	    return;
 	}
 	for (var i in campus) {
@@ -25,12 +25,12 @@ app.get('/:id', function(req, res){
 	res.send("not found, sorry");
 });
 
-app.get('/images/:name', function(req, res){
+app.get('/:user/images/:name', function(req, res){
 	res.status(200);
 	res.sendFile(__dirname + "/" + req.params.name);
 });
 
-app.delete('/:id/:item', function(req, res){
+app.delete('/:user/:id/:item', function(req, res){
 	for (var i in campus) {
 		if (req.params.id == campus[i].id) {
 		    res.set({'Content-Type': 'application/json'});
@@ -40,8 +40,8 @@ app.delete('/:id/:item', function(req, res){
 		    }
 		    if (ix >= 0) {
 		       res.status(200);
-			inventory.push(campus[i].what[ix]); // stash
-		        res.send(inventory);
+			user_data[req.params.user].inventory.push(campus[i].what[ix]); // stash
+		        res.send(user_data[req.params.user].inventory);
 			campus[i].what.splice(ix, 1); // room no longer has this
 			return;
 		    }
@@ -54,11 +54,11 @@ app.delete('/:id/:item', function(req, res){
 	res.send("location not found");
 });
 
-app.put('/:id/:item', function(req, res){
+app.put('/:user/:id/:item', function(req, res){
 	for (var i in campus) {
 		if (req.params.id == campus[i].id) {
 				// Check you have this
-				var ix = inventory.indexOf(req.params.item)
+				var ix = user_data[req.params.user].inventory.indexOf(req.params.item);
 				if (ix >= 0) {
 					dropbox(ix,campus[i]);
 					res.set({'Content-Type': 'application/json'});
@@ -90,7 +90,7 @@ var dropbox = function(ix,room) {
 	room.what.push(item);
 }
 
-var inventory = ["laptop"];
+var user_data = { NAME: {"inventory" : ["laptop"]}, PHILIP: {"inventory" : ["MAGICAL DILDO"]} }
 
 var campus =
     [ { "id": "lied-center",
