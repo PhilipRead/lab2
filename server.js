@@ -6,6 +6,13 @@ app.get('/', function(req, res){
 	res.sendFile(__dirname + "/index.html");
 });
 
+app.post('/login/:user', function(req, res)
+	{
+		if (user_data[req.params.user] == null) {		 // Stomp your feet
+			user_data[req.params.user] = {"inventory" : ["FUCKMEIMNOTAUSER"]};
+	}
+});
+
 app.get('/:user/:id', function(req, res){
 	if (req.params.id == "inventory") {
 	    res.set({'Content-Type': 'application/json'});
@@ -60,7 +67,7 @@ app.put('/:user/:id/:item', function(req, res){
 				// Check you have this
 				var ix = user_data[req.params.user].inventory.indexOf(req.params.item);
 				if (ix >= 0) {
-					dropbox(ix,campus[i]);
+					dropbox(ix,campus[i],req.params.user);
 					res.set({'Content-Type': 'application/json'});
 					res.status(200);
 					res.send([]);
@@ -77,9 +84,9 @@ app.put('/:user/:id/:item', function(req, res){
 
 app.listen(3000);
 
-var dropbox = function(ix,room) {
-	var item = inventory[ix];
-	inventory.splice(ix, 1);	 // remove from inventory
+var dropbox = function(ix,room,user) {
+	var item = user_data[user].inventory[ix];
+	user_data[user].inventory.splice(ix, 1);	 // remove from inventory
 	if (room.id == 'allen-fieldhouse' && item == "basketball") {
 		room.text	+= " Someone found the ball so there is a game going on!"
 		return;
