@@ -16,19 +16,46 @@
   <script>
 
 	var user;
+	var myupdate;
+	var mylocation;
+	
+
 	function login_click()
 	{
 			user = $("#username").val();
 			$("#login").hide();
-			gameStart();
+			//gameStart();
+			get_login();
 	}
-
-	 function gameStart() {
+	function get_login()
+	{
 	   $("#where").html("booting...");
-	   where = "strong-hall";
-	   who = user;
+	   //where = "eaton-hall"; 
+	   
+		$.post("/login/" + user, function (data){
+		
+			console.log("made it to the post");
+			gameStart();
+	  		} );
+			
+	}
+	 function gameStart() {
+		$.get("/" + user + "/location", function (data){
+			where = data[0];
+		} );
+	   /*who = user;
+	   
+	     $.get("/" + user + "/location", function (data){
+	  	 	where = data[0];
+	  		} );
 		$.post("/login/" + user);
-	   function refresh() {
+	   who = user;*/
+		
+	   refresh = function() {
+	   	$.get("/getupdate/" + where, function (data){
+	     		console.log(data.update);
+	  	 		myupdate = data.update;
+	  		} );
 	     $.get("/" + user + "/" + where, function (data) {
 	        $("#where").html(data.text);
 	        $("#picture").attr("src",user + "/images/" + data.where);
@@ -63,6 +90,7 @@
 	         (function(button,dest) {
 	           button.click(function() {
 	             where = dest;
+				 myupdate = 0;
 	             refresh();
 	           });
 	         })(button,data.next[i]);
@@ -71,30 +99,11 @@
 
 
 	     });
-/*	     $.get("/"+ user + "/inventory",function (data) {
-	       if (data == undefined || data.length == 0) {
-	          $("#inventory").html("You are not carrying anything");
-	       } else {
-	          $("#inventory").html("You are carrying : ");
-	          for(var i in data) {
-	            var item = data[i];
-	            $("#inventory").append(item);
-	            button = $("<button/>");
-	            button.text("Drop " + item);
-	             (function(button,user,where,item) {
-	               button.click(function() {
-	                 $.ajax("/" user + "/" + where + "/" + item, { success : refresh, type : "PUT"});
-	                 refresh();
-	               });
-	             })(button,where,item);
-	            $("#inventory").append(button);
-	         }
-	       }
-	     });
-	   }
-*/
-        $.get("/"+ user + "/inventory",function (data) {
-          if (data == undefined || data.length == 0) {
+
+        $.get("/"+ user + "/inventory",
+        function (data) 
+        {
+        if (data == undefined || data.length == 0) {
              $("#inventory").html("You are not carrying anything");
           } else {
              $("#inventory").html("You are carrying : ");
@@ -119,11 +128,16 @@
             }
           }
         });
-      }
+		setInterval(function(){checkForUpdate();}, 3000);
+		}
 	   refresh();
+	   
 
 	 }
-
+	function checkForUpdate()
+	{
+			$.get("/getupdate/" + where, function (data){if(myupdate != data.update){refresh();}});
+	}
   </script>
   </body>
 </html>
