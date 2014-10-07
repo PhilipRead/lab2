@@ -9,6 +9,7 @@ app.get('/', function(req, res){
 
 app.post('/login/:user', function(req, res)
 {
+	storeCampus();
 	if (user_data[req.params.user] == null) {		 // Stomp your feet
 		user_data[req.params.user] = {"inventory" : ["Piece of Pie"], "loc" : ["strong-hall"]};
 		res.set({'Content-Type': 'application/json'});
@@ -152,6 +153,30 @@ var dropbox = function(ix,room,user) {
 	room.what.push(item);
 }
 
+var loadAll = function(){
+	var fs = require('fs');
+	var userFile = 'user_data.txt';
+	var campusFile = 'campus.txt';
+
+	fs.readFile(userFile, 'utf8', function (err, data) {
+	if (err) {
+		console.log('Error: ' + err);
+		return;
+	}
+
+	user_data = JSON.parse(data);
+		});
+
+	fs.readFile(campusFile, 'utf8', function (err, data) {
+	if (err) {
+		console.log('Error: ' + err);
+		return;
+	}
+
+	campus = JSON.parse(data);
+
+    	});
+}
 var storeAll = function(){
 	storeUser();
 	storeCampus();
@@ -177,7 +202,7 @@ var storeCampus = function(){
 		});
 }
 
-var user_data = { NAME: {"inventory" : ["laptop"], "loc" : ["strong-hall"] }, PHILIP: {"inventory" : ["Philip's Diary"], "loc" : ["strong-hall"] }}
+var user_data = {};
 
 var campus =
     [ { "id": "lied-center",
