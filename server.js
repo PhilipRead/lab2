@@ -9,9 +9,9 @@ app.get('/', function(req, res){
 
 app.post('/login/:user', function(req, res)
 {
-	storeCampus();
 	if (user_data[req.params.user] == null) {		 // Stomp your feet
 		user_data[req.params.user] = {"inventory" : ["Piece of Pie"], "loc" : ["strong-hall"]};
+		campus["strong-hall"].people.push(req.params.user);
 		res.set({'Content-Type': 'application/json'});
 		res.status(200);
 		res.send([]);
@@ -51,6 +51,7 @@ app.get('/:user/:id', function(req, res){
 		    res.set({'Content-Type': 'application/json'});
 		    res.status(200);
 		    res.send(campus[i]);
+		    
 			//console.log("User: " + req.params.user)
 			//console.log("ID: " + req.params.id)
 			//console.log(user_data[req.params.user]);
@@ -58,10 +59,34 @@ app.get('/:user/:id', function(req, res){
 			//console.log(user_data[req.params.user].loc[0]);
 			//console.log(campus[i]);
 			//console.log(campus[i].id);
-			if (req.params.user != 'getupdate') 
+						
+			
+			if (req.params.user != 'getupdate' && campus[i].people != null)
 			{
-				user_data[req.params.user].loc[0] = campus[i].id;
+				var oldlocation = user_data[req.params.user].loc[0]; //save old location
+				var oldlocIndex;
+				for (var j in campus) 
+				{
+					if (oldlocation == campus[j].id) 
+					{
+						oldlocIndex = j;//get old location index
+						break;
+					}
+				}
+				if(oldlocIndex != i)//can't move to your own location
+				{
+					user_data[req.params.user].loc[0] = campus[i].id;//save new location to user
+					var index = campus[oldlocIndex].people.indexOf(req.params.user);
+					if (index > -1) {
+    					campus[oldlocIndex].people.splice(index, 1); //remove person from old location
+					}
+				
+					campus[i].people.push(req.params.user); //add to new location
+					++campus[i].update;
+					++campus[oldlocIndex].update;
+				}
 			}
+			
 		    return;
 		}
 	}
@@ -239,7 +264,7 @@ var campus =
 	"what": ["coffee"],
 	"text": "You are outside Stong Hall.",
 	"update" : 0,
-	"people" : []
+	"people" : ["PHILIP","NAME"]
       },
       { "id": "ambler-recreation",
 	"where": "AmblerRecreation.jpg",
