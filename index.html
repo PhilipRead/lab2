@@ -59,6 +59,27 @@
 	     $.get("/" + user + "/" + where, function (data) {
 	        $("#where").html(data.text);
 	        $("#picture").attr("src",user + "/images/" + data.where);
+	        
+	        
+	        if(data.people == undefined || data.people.length < 2)
+	        {
+	         $("#who").html("");
+	        }
+	        else
+	        {
+	         $("#who").html("Hey, you see some other players : ");
+	        	for(var i in data.people) 
+	        	{
+	             var item = data.people[i];
+	        		if(data.people[i] != user)
+					{			
+	             $("#who").append(item);
+	             $("#who").append("  ");
+	            }
+	        	}
+	        }
+	        
+	        
 	        if (data.what == undefined || data.what.length == 0) {
 	           $("#what").html("");
 	        } else {
