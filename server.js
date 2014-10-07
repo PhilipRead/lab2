@@ -1,17 +1,52 @@
+
+var loadAll = function(){
+	var fs = require('fs');
+	var userFile = 'user_data.txt';
+	var campusFile = 'campus.txt';
+
+	fs.readFile(userFile, 'utf8', function (err, data) {
+	if (err) {
+		console.log('Error: ' + err);
+		return;
+	}
+
+	user_data = JSON.parse(data);
+		});
+
+	fs.readFile(campusFile, 'utf8', function (err, data) {
+	if (err) {
+		console.log('Error: ' + err);
+		return;
+	}
+
+	campus = JSON.parse(data);
+
+    	});
+}
+
 var express = require('express');
 var app = express();
 var update = -1;
+loadAll();
 
 app.get('/', function(req, res){
 	res.status(200);
 	res.sendFile(__dirname + "/index.html");
 });
 
+app.post('/storeAll'), function(req, res){
+
+storeAll();
+
+}
+
 app.post('/login/:user', function(req, res)
 {
 	if (user_data[req.params.user] == null) {		 // Stomp your feet
 		user_data[req.params.user] = {"inventory" : ["Piece of Pie"], "loc" : ["strong-hall"]};
-		campus["strong-hall"].people.push(req.params.user);
+		campus[4].people.push(req.params.user);//add to new location
+		++campus[4].update;
+		storeAll();
 		res.set({'Content-Type': 'application/json'});
 		res.status(200);
 		res.send([]);
@@ -84,6 +119,7 @@ app.get('/:user/:id', function(req, res){
 					campus[i].people.push(req.params.user); //add to new location
 					++campus[i].update;
 					++campus[oldlocIndex].update;
+					storeAll();
 				}
 			}
 			
@@ -130,6 +166,7 @@ app.delete('/:user/:id/:item', function(req, res){
 		        res.send(user_data[req.params.user].inventory);
 			campus[i].what.splice(ix, 1); // room no longer has this
 			++campus[i].update;
+			storeAll();
 			return;
 		    }
 		    res.status(200);
@@ -151,6 +188,7 @@ app.put('/:user/:id/:item', function(req, res){
 					res.set({'Content-Type': 'application/json'});
 					res.status(200);
 					++campus[i].update;
+					storeAll();
 					res.send([]);
 				} else {
 					res.status(404);
@@ -178,30 +216,7 @@ var dropbox = function(ix,room,user) {
 	room.what.push(item);
 }
 
-var loadAll = function(){
-	var fs = require('fs');
-	var userFile = 'user_data.txt';
-	var campusFile = 'campus.txt';
 
-	fs.readFile(userFile, 'utf8', function (err, data) {
-	if (err) {
-		console.log('Error: ' + err);
-		return;
-	}
-
-	user_data = JSON.parse(data);
-		});
-
-	fs.readFile(campusFile, 'utf8', function (err, data) {
-	if (err) {
-		console.log('Error: ' + err);
-		return;
-	}
-
-	campus = JSON.parse(data);
-
-    	});
-}
 var storeAll = function(){
 	storeUser();
 	storeCampus();
@@ -264,7 +279,7 @@ var campus =
 	"what": ["coffee"],
 	"text": "You are outside Stong Hall.",
 	"update" : 0,
-	"people" : ["PHILIP","NAME"]
+	"people" : []
       },
       { "id": "ambler-recreation",
 	"where": "AmblerRecreation.jpg",
