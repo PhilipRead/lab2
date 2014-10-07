@@ -152,6 +152,31 @@ var dropbox = function(ix,room,user) {
 	room.what.push(item);
 }
 
+var storeAll = function(){
+	storeUser();
+	storeCampus();
+}
+
+var storeUser = function(){
+	var fs = require('fs');
+	var stream = fs.createWriteStream("user_data.txt");
+
+	stream.once('open', function(fd) {
+	stream.write(JSON.stringify(user_data));
+	stream.end(); 
+		});
+}
+
+var storeCampus = function(){
+	var fs = require('fs');
+	var stream = fs.createWriteStream("campus.txt");
+
+	stream.once('open', function(fd) {
+	stream.write(JSON.stringify(campus));
+	stream.end(); 
+		});
+}
+
 var user_data = { NAME: {"inventory" : ["laptop"], "loc" : ["strong-hall"] }, PHILIP: {"inventory" : ["Philip's Diary"], "loc" : ["strong-hall"] }}
 
 var campus =
